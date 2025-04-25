@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Goal Tracker Dashboard</title>
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.16/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        .dashboard-card {
+            transition: all 0.3s ease;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .goal-item {
+            transition: all 0.2s ease;
+        }
+        .goal-item:hover {
+            background-color: #f1f5f9;
+        }
+        .dark-mode {
+            background-color: #010710;
+            color: #f8fafc;
+        }
+        .dark-mode .dashboard-card {
+            background-color: #2b4870;
+            color: #f8fafc;
+        }
+        .dark-mode .goal-item:hover {
+            background-color: #ecf0f5;
+        }
+        .category-health { background-color: #dcfce7; color: #166534; }
+        .dark-mode .category-health { background-color: #14532d; color: #bbf7d0; }
+        .category-career { background-color: #dbeafe; color: #1e40af; }
+        .dark-mode .category-career { background-color: #1e3a8a; color: #bfdbfe; }
+        .category-learning { background-color: #f3e8ff; color: #6b21a8; }
+        .dark-mode .category-learning { background-color: #5b21b6; color: #e9d5ff; }
+        .category-personal { background-color: #fef3c7; color: #92400e; }
+        .dark-mode .category-personal { background-color: #78350f; color: #fde68a; }
+        .btn-danger {
+            background-color: #ef4444;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #dc2626;
+        }
+        .dark-mode .btn-danger {
+            background-color: #b91c1c;
+        }
+        .dark-mode .btn-danger:hover {
+            background-color: #991b1b;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50">
+    <!-- Dashboard Container -->
+    <div class="container mx-auto px-4 py-6 max-w-7xl">
+        <!-- Enhanced Header Section -->
+        <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
+            <div class="flex items-center space-x-4">
+                <div class="p-3 rounded-full bg-blue-600 text-white">
+                    <i class="fas fa-bullseye text-xl"></i>
+                </div>
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-500 dark:text-white">Goal Tracker Pro</h1>
+                    <p class="text-gray-600 dark:text-white">Achieve more every day</p>
+                    
+                </div>
+            </div>
+            <div class="flex items-center space-x-4">
+                <div class="hidden md:block">
+                    <span class="text-sm text-gray-500 dark:text-gray-400">Last updated: <span id="last-updated"></span></span>
+                </div>
+                <button id="dark-mode-toggle" class="p-2 rounded-full bg-gray-200 dark:bg-gray-600 text-gray-700 dark:text-gray-200">
+                    <i class="fas fa-moon dark:hidden"></i>
+                    <i class="fas fa-sun hidden dark:inline"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Stats Overview -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Total Goals Card -->
+            <div class="dashboard-card bg-white dark:bg-gray-800 shadow-sm" data-aos="fade-up">
+                <div class="p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Goals</p>
+                            <h3 id="total-goals" class="text-2xl font-bold text-gray-800 dark:text-white mt-1">0</h3>
+                        </div>
+                        <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300">
+                            <i class="fas fa-bullseye text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <span class="text-green-500 text-sm font-medium" id="total-change">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Completed Goals Card -->
+            <div class="dashboard-card bg-white dark:bg-gray-800 shadow-sm" data-aos="fade-up" data-aos-delay="100">
+                <div class="p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Completed</p>
+                            <h3 id="completed-goals" class="text-2xl font-bold text-gray-800 dark:text-white mt-1">0</h3>
+                        </div>
+                        <div class="p-3 rounded-full bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300">
+                            <i class="fas fa-check-circle text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <span class="text-green-500 text-sm font-medium" id="completed-change">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- In Progress Card -->
+            <div class="dashboard-card bg-white dark:bg-gray-800 shadow-sm" data-aos="fade-up" data-aos-delay="200">
+                <div class="p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">In Progress</p>
+                            <h3 id="progress-goals" class="text-2xl font-bold text-gray-800 dark:text-white mt-1">0</h3>
+                        </div>
+                        <div class="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900 text-yellow-600 dark:text-yellow-300">
+                            <i class="fas fa-spinner text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <span class="text-yellow-500 text-sm font-medium" id="progress-change">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Streak Card -->
+            <div class="dashboard-card bg-white dark:bg-gray-800 shadow-sm" data-aos="fade-up" data-aos-delay="300">
+                <div class="p-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Current Streak</p>
+                            <h3 id="current-streak" class="text-2xl font-bold text-gray-800 dark:text-white mt-1">0 days</h3>
+                        </div>
+                        <div class="p-3 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300">
+                            <i class="fas fa-fire text-xl"></i>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <span class="text-purple-500 text-sm font-medium" id="streak-message">Keep it up!</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Goals Chart -->
+            <div class="lg:col-span-2 dashboard-card bg-white dark:bg-gray-800 shadow-sm" data-aos="fade-up">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold text-gray-500 dark:text-white">Goal Progress</h2>
+                        <div class="flex space-x-2">
+                            <button id="daily-btn" class="px-3 py-1 text-sm bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300 rounded-full">Daily</button>
+                            <button id="weekly-btn" class="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full">Weekly</button>
+                            <button id="monthly-btn" class="px-3 py-1 text-sm bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded-full">Monthly</button>
+                        </div>
+                    </div>
+                    <div class="h-80">
+                        <canvas id="goal-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Goal Section -->
+            <div class="dashboard-card bg-white dark:bg-gray-800 shadow-sm" data-aos="fade-up" data-aos-delay="100">
+                <div class="p-6">
+                    <h2 class="text-xl font-semibold text-gray-500 dark:text-white mb-4">Add New Goal</h2>
+                    <form id="goal-form" class="space-y-4">
+                        <div>
+                            <label for="goal-text" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Goal</label>
+                            <input type="text" id="goal-text" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white" placeholder="What do you want to achieve?" required>
+                        </div>
+                        <div>
+                            <label for="goal-category" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                            <select id="goal-category" class="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:text-white">
+                                <option value="health">Health & Fitness</option>
+                                <option value="career">Career</option>
+                                <option value="learning">Learning</option>
+                                <option value="personal">Personal Development</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition duration-200 flex items-center justify-center space-x-2">
+                            <i class="fas fa-plus"></i>
+                            <span>Add Goal</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Goals List and Motivational Quote -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Today's Goals -->
+            <div class="lg:col-span-2 dashboard-card bg-white dark:bg-gray-800 shadow-sm" data-aos="fade-up">
+                <div class="p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-xl font-semibold text-gray-500 dark:text-white">Today's Goals</h2>
+                        <span id="goal-count" class="text-sm text-gray-500 dark:text-gray-400">0 goals</span>
+                    </div>
+                    <div class="space-y-3" id="goal-list">
+                        <!-- Goals will be dynamically populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Motivational Quote and Recent Activity -->
+            <div class="space-y-6">
+                <!-- Motivational Quote -->
+                <div class="dashboard-card bg-white dark:bg-gray-800 shadow-sm" data-aos="fade-up" data-aos-delay="100">
+                    <div class="p-6">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="p-2 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-600 dark:text-indigo-300">
+                                <i class="fas fa-quote-left"></i>
+                            </div>
+                            <h2 class="text-xl font-semibold text-gray-500 dark:text-white">Daily Motivation</h2>
+                        </div>
+                        <div class="text-center py-4">
+                            <blockquote class="text-lg italic text-gray-700 dark:text-gray-300 mb-4" id="quote">
+                                Loading quote...
+                            </blockquote>
+                            <p class="text-sm text-gray-500 dark:text-gray-400" id="quote-author"></p>
+                        </div>
+                        <button id="new-quote" class="w-full mt-4 bg-indigo-100 dark:bg-indigo-900 hover:bg-indigo-200 dark:hover:bg-indigo-800 text-indigo-600 dark:text-indigo-300 font-medium py-2 px-4 rounded-lg transition duration-200">
+                            Get New Quote
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="dashboard-card bg-white dark:bg-gray-800 shadow-sm" data-aos="fade-up" data-aos-delay="200">
+                    <div class="p-6">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="p-2 rounded-full bg-yellow-100 dark:bg-yellow-900 text-yellow-600 dark:text-yellow-300">
+                                <i class="fas fa-history"></i>
+                            </div>
+                            <h2 class="text-xl font-semibold text-gray-500 dark:text-white">Recent Activity</h2>
+                        </div>
+                        <div class="space-y-4" id="recent-activity">
+                            <!-- Activity will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <!-- History Section -->
+<div class="dashboard-card bg-white dark:bg-gray-800 shadow-sm mt-8" data-aos="fade-up">
+    <div class="p-6">
+        <div class="flex items-center space-x-3 mb-6">
+            <div class="p-2 rounded-full bg-purple-100 dark:bg-purple-900 text-purple-600 dark:text-purple-300">
+                <i class="fas fa-history"></i>
+            </div>
+            <h2 class="text-xl font-semibold text-gray-500 dark:text-white">Goal History</h2>
+        </div>
+        
+        <div class="space-y-6" id="history-container">
+            <!-- History will be loaded here -->
+        </div>
+        
+        <button id="load-more-history" class="w-full mt-6 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-300 font-medium py-2 px-4 rounded-lg transition duration-200">
+            Load More
+        </button>
+    </div>
+</div>
+
+
+    <!-- Footer -->
+    <footer class="mt-12 py-6 text-center text-gray-500 dark:text-gray-400 text-sm">
+        <p>© <span id="current-year"></span> Goal Tracker Pro. All rights reserved.</p>
+    </footer>
+
+    <!-- AOS Animation -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        // Initialize AOS animation
+        AOS.init({
+            duration: 800,
+            easing: 'ease-in-out',
+            once: true
+        });
+
+        // Set current year in footer
+        document.getElementById('current-year').textContent = new Date().getFullYear();
+        
+        // Set last updated time
+        document.getElementById('last-updated').textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+        // Dark mode toggle
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        darkModeToggle.addEventListener('click', () => {
+            document.body.classList.toggle('dark-mode');
+            localStorage.setItem('darkMode', document.body.classList.contains('dark-mode'));
+        });
+
+        // Check for saved dark mode preference
+        if (localStorage.getItem('darkMode') === 'true') {
+            document.body.classList.add('dark-mode');
+        }
+
+        // Chart variables
+        let goalChart;
+        let chartData = {};
+        let chartType = 'daily';
+
+        // DOM Elements
+        const goalForm = document.getElementById('goal-form');
+        const goalList = document.getElementById('goal-list');
+        const goalCount = document.getElementById('goal-count');
+        const quoteElement = document.getElementById('quote');
+        const quoteAuthor = document.getElementById('quote-author');
+        const recentActivity = document.getElementById('recent-activity');
+        const dailyBtn = document.getElementById('daily-btn');
+        const weeklyBtn = document.getElementById('weekly-btn');
+        const monthlyBtn = document.getElementById('monthly-btn');
+
+        // Stats elements
+        const totalGoalsElement = document.getElementById('total-goals');
+        const completedGoalsElement = document.getElementById('completed-goals');
+        const progressGoalsElement = document.getElementById('progress-goals');
+        const currentStreakElement = document.getElementById('current-streak');
+        const totalChangeElement = document.getElementById('total-change');
+        const completedChangeElement = document.getElementById('completed-change');
+        const progressChangeElement = document.getElementById('progress-change');
+        const streakMessageElement = document.getElementById('streak-message');
+
+        // Category icons and colors
+        const categoryConfig = {
+            'health': { icon: 'fa-running', colorClass: 'category-health' },
+            'career': { icon: 'fa-briefcase', colorClass: 'category-career' },
+            'learning': { icon: 'fa-book', colorClass: 'category-learning' },
+            'personal': { icon: 'fa-user', colorClass: 'category-personal' },
+            'other': { icon: 'fa-bullseye', colorClass: 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200' }
+        };
+
+        // Initialize the dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            fetchGoals();
+            fetchStats();
+            fetchQuote();
+            setupEventListeners();
+        });
+
+        // Set up event listeners
+        function setupEventListeners() {
+            // Form submission
+            goalForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const goalText = document.getElementById('goal-text').value;
+                const goalCategory = document.getElementById('goal-category').value;
+                
+                fetch('/add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: goalText })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.message === 'Goal added successfully!') {
+                        fetchGoals();
+                        goalForm.reset();
+                        addActivity(`Added "${goalText}"`, 'add');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+            });
+
+            // New quote button
+            document.getElementById('new-quote').addEventListener('click', fetchQuote);
+
+            // Chart period buttons
+            dailyBtn.addEventListener('click', function() {
+                chartType = 'daily';
+                dailyBtn.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-gray-600', 'dark:text-gray-300');
+                dailyBtn.classList.add('bg-blue-100', 'dark:bg-blue-900', 'text-blue-600', 'dark:text-blue-300');
+                weeklyBtn.classList.remove('bg-blue-100', 'dark:bg-blue-900', 'text-blue-600', 'dark:text-blue-300');
+                weeklyBtn.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-600', 'dark:text-gray-300');
+                monthlyBtn.classList.remove('bg-blue-100', 'dark:bg-blue-900', 'text-blue-600', 'dark:text-blue-300');
+                monthlyBtn.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-600', 'dark:text-gray-300');
+                updateChart();
+            });
+
+            weeklyBtn.addEventListener('click', function() {
+                chartType = 'weekly';
+                weeklyBtn.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-gray-600', 'dark:text-gray-300');
+                weeklyBtn.classList.add('bg-blue-100', 'dark:bg-blue-900', 'text-blue-600', 'dark:text-blue-300');
+                dailyBtn.classList.remove('bg-blue-100', 'dark:bg-blue-900', 'text-blue-600', 'dark:text-blue-300');
+                dailyBtn.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-600', 'dark:text-gray-300');
+                monthlyBtn.classList.remove('bg-blue-100', 'dark:bg-blue-900', 'text-blue-600', 'dark:text-blue-300');
+                monthlyBtn.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-600', 'dark:text-gray-300');
+                updateChart();
+            });
+
+            monthlyBtn.addEventListener('click', function() {
+                chartType = 'monthly';
+                monthlyBtn.classList.remove('bg-gray-100', 'dark:bg-gray-700', 'text-gray-600', 'dark:text-gray-300');
+                monthlyBtn.classList.add('bg-blue-100', 'dark:bg-blue-900', 'text-blue-600', 'dark:text-blue-300');
+                dailyBtn.classList.remove('bg-blue-100', 'dark:bg-blue-900', 'text-blue-600', 'dark:text-blue-300');
+                dailyBtn.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-600', 'dark:text-gray-300');
+                weeklyBtn.classList.remove('bg-blue-100', 'dark:bg-blue-900', 'text-blue-600', 'dark:text-blue-300');
+                weeklyBtn.classList.add('bg-gray-100', 'dark:bg-gray-700', 'text-gray-600', 'dark:text-gray-300');
+                updateChart();
+            });
+        }
+
+        // Fetch goals from backend
+        function fetchGoals() {
+            fetch('/goals')
+                .then(response => response.json())
+                .then(goals => {
+                    renderGoals(goals);
+                    updateStats(goals);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Render goals in the list
+        function renderGoals(goals) {
+            goalList.innerHTML = '';
+            goalCount.textContent = `${goals.length} ${goals.length === 1 ? 'goal' : 'goals'}`;
+
+            if (goals.length === 0) {
+                goalList.innerHTML = `
+                    <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-inbox text-4xl mb-2"></i>
+                        <p>No goals for today</p>
+                    </div>
+                `;
+                return;
+            }
+
+            goals.forEach(goal => {
+                const category = goal.category || 'other';
+                const config = categoryConfig[category] || categoryConfig['other'];
+                
+                const goalItem = document.createElement('div');
+                goalItem.className = `goal-item p-4 border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-between ${goal.completed ? 'bg-gray-50 dark:bg-gray-700' : ''}`;
+                goalItem.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <div class="w-8 h-8 rounded-full ${config.colorClass} flex items-center justify-center">
+                            <i class="fas ${config.icon} text-xs"></i>
+                        </div>
+                        <div>
+                            <h4 class="font-medium text-gray-800 dark:text-white ${goal.completed ? 'line-through' : ''}">${goal.text}</h4>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Today</p>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button onclick="markComplete(${goal.id}, this)" class="p-2 ${goal.completed ? 'text-green-500' : 'text-gray-400 hover:text-green-500'} transition" ${goal.completed ? 'disabled' : ''}>
+                            <i class="fas ${goal.completed ? 'fa-check-circle' : 'fa-check'}"></i>
+                        </button>
+                        <button onclick="deleteGoal(${goal.id}, this)" class="p-2 text-gray-400 hover:text-red-500 transition">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                `;
+                goalList.appendChild(goalItem);
+            });
+        }
+
+        // Mark goal as complete
+function markComplete(goalId, button) {
+    fetch(`/complete/${goalId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message === 'Goal marked as completed!') {
+            fetchGoals();
+            // Find the goal text for the activity
+            const goalText = button.closest('.goal-item').querySelector('h4').textContent;
+            addActivity(`Completed "${goalText}"`, 'complete');
+            
+            // Fetch a new quote immediately after completion
+            fetchQuote();
+            
+            // Optional: Show a small celebration effect
+            showCelebration();
+        }
+    })
+    .catch(error => console.error('Error:', error));
+}
+
+// Optional: Add a small celebration effect
+function showCelebration() {
+    const celebration = document.createElement('div');
+    celebration.className = 'fixed inset-0 flex items-center justify-center pointer-events-none z-50';
+    celebration.innerHTML = `
+        <div class="animate-bounce text-4xl text-yellow-400 opacity-0" style="animation-delay: 0.1s">
+            <i class="fas fa-star"></i>
+        </div>
+    `;
+    document.body.appendChild(celebration);
+    
+    // Make the star visible briefly
+    setTimeout(() => {
+        celebration.querySelector('div').classList.remove('opacity-0');
+    }, 10);
+    
+    // Remove after animation
+    setTimeout(() => {
+        celebration.remove();
+    }, 1000);
+}
+
+        // Delete goal
+        function deleteGoal(goalId, button) {
+            if (!confirm('Are you sure you want to delete this goal?')) return;
+            
+            fetch(`/delete/${goalId}`, {
+                method: 'DELETE'
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'Goal deleted successfully!') {
+                    fetchGoals();
+                    // Find the goal text for the activity
+                    const goalText = button.closest('.goal-item').querySelector('h4').textContent;
+                    addActivity(`Deleted "${goalText}"`, 'delete');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Fetch stats from backend
+        function fetchStats() {
+            fetch('/stats')
+                .then(response => response.json())
+                .then(data => {
+                    chartData = data;
+                    initializeChart();
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Initialize the chart
+        function initializeChart() {
+            const ctx = document.getElementById('goal-chart').getContext('2d');
+            
+            // Process data for the chart
+            const processedData = processChartData(chartData, chartType);
+            
+            goalChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: processedData.labels,
+                    datasets: [
+                        {
+                            label: 'Goals Set',
+                            data: processedData.setData,
+                            borderColor: 'rgba(59, 130, 246, 1)',
+                            backgroundColor: 'rgba(59, 130, 246, 0.05)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3,
+                            pointBackgroundColor: 'rgba(59, 130, 246, 1)',
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        },
+                        {
+                            label: 'Goals Completed',
+                            data: processedData.completedData,
+                            borderColor: 'rgba(16, 185, 129, 1)',
+                            backgroundColor: 'rgba(16, 185, 129, 0.05)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3,
+                            pointBackgroundColor: 'rgba(16, 185, 129, 1)',
+                            pointRadius: 4,
+                            pointHoverRadius: 6
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                            labels: {
+                                color: '#6b7280',
+                                font: {
+                                    family: 'Inter'
+                                }
+                            }
+                        },
+                        tooltip: {
+                            mode: 'index',
+                            intersect: false,
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            titleColor: '#1f2937',
+                            bodyColor: '#374151',
+                            borderColor: '#e5e7eb',
+                            borderWidth: 1,
+                            padding: 12,
+                            usePointStyle: true,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += context.parsed.y;
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(229, 231, 235, 0.2)'
+                            },
+                            ticks: {
+                                color: '#6b7280',
+                                stepSize: 1
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#6b7280',
+                                maxRotation: 45,
+                                minRotation: 45
+                            }
+                        }
+                    },
+                    interaction: {
+                        intersect: false,
+                        mode: 'index'
+                    }
+                }
+            });
+        }
+
+        // Update chart based on selected period
+        function updateChart() {
+            const processedData = processChartData(chartData, chartType);
+            
+            goalChart.data.labels = processedData.labels;
+            goalChart.data.datasets[0].data = processedData.setData;
+            goalChart.data.datasets[1].data = processedData.completedData;
+            goalChart.update();
+        }
+
+        // Process chart data for daily, weekly or monthly view
+        function processChartData(data, type) {
+            // Group data by day, week or month
+            const groupedData = {};
+            const today = new Date();
+            
+            data.forEach(item => {
+                const date = new Date(item.date);
+                let key;
+                
+                if (type === 'daily') {
+                    // Daily view - use the date as is
+                    key = date.toISOString().split('T')[0];
+                } else if (type === 'weekly') {
+                    // Get start of week (Monday)
+                    const day = date.getDay() || 7; // Make Sunday 7 instead of 0
+                    const startOfWeek = new Date(date);
+                    startOfWeek.setDate(date.getDate() - (day - 1));
+                    key = startOfWeek.toISOString().split('T')[0];
+                } else {
+                    // Monthly view
+                    key = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
+                }
+                
+                if (!groupedData[key]) {
+                    groupedData[key] = { set: 0, completed: 0 };
+                }
+                
+                groupedData[key].set += item.set;
+                groupedData[key].completed += item.completed;
+            });
+            
+            // Sort keys chronologically
+            const sortedKeys = Object.keys(groupedData).sort();
+            
+            // Prepare labels and data
+            const labels = sortedKeys.map(key => {
+                if (type === 'daily') {
+                    return formatDateShort(new Date(key));
+                } else if (type === 'weekly') {
+                    const date = new Date(key);
+                    const endOfWeek = new Date(date);
+                    endOfWeek.setDate(date.getDate() + 6);
+                    return `${formatDateShort(date)} - ${formatDateShort(endOfWeek)}`;
+                } else {
+                    const [year, month] = key.split('-');
+                    return new Date(year, month - 1).toLocaleDateString('default', { month: 'short', year: 'numeric' });
+                }
+            });
+            
+            const setData = sortedKeys.map(key => groupedData[key].set);
+            const completedData = sortedKeys.map(key => groupedData[key].completed);
+            
+            return { labels, setData, completedData };
+        }
+
+        // Fetch motivational quote
+        function fetchQuote() {
+            fetch('/quote')
+                .then(response => response.json())
+                .then(data => {
+                    quoteElement.textContent = `"${data.quote}"`;
+                    quoteAuthor.textContent = data.author ? `— ${data.author}` : '';
+                })
+                .catch(error => {
+                    console.error('Error fetching quote:', error);
+                    quoteElement.textContent = '"The only way to do great work is to love what you do."';
+                    quoteAuthor.textContent = '— Steve Jobs';
+                });
+        }
+
+        // Update stats cards
+        function updateStats(goals) {
+            const total = goals.length;
+            const completed = goals.filter(g => g.completed).length;
+            const inProgress = total - completed;
+            
+            totalGoalsElement.textContent = total;
+            completedGoalsElement.textContent = completed;
+            progressGoalsElement.textContent = inProgress;
+            
+            // Simple "change" indicators (in a real app, you'd compare with previous data)
+            totalChangeElement.textContent = total > 0 ? '+New goals today' : 'No goals yet';
+            completedChangeElement.textContent = completed > 0 ? `${Math.round((completed / total) * 100)}% completed` : 'Start completing goals!';
+            progressChangeElement.textContent = inProgress > 0 ? `${inProgress} in progress` : 'All caught up!';
+            
+            // Simple streak calculation (in a real app, you'd track this properly)
+            const streak = completed > 0 ? Math.min(completed, 7) : 0;
+            currentStreakElement.textContent = streak > 0 ? `${streak} day${streak > 1 ? 's' : ''}` : '0 days';
+            streakMessageElement.textContent = streak > 3 ? 'Great streak!' : streak > 0 ? 'Keep going!' : 'Start your streak!';
+        }
+
+        // Add activity to recent activity list
+        function addActivity(text, type) {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            const activityItem = document.createElement('div');
+            activityItem.className = 'flex items-start space-x-3';
+            
+            let iconClass, icon;
+            if (type === 'complete') {
+                iconClass = 'bg-green-100 dark:bg-green-900 text-green-600 dark:text-green-300';
+                icon = 'fa-check';
+            } else if (type === 'delete') {
+                iconClass = 'bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-300';
+                icon = 'fa-trash';
+            } else {
+                iconClass = 'bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-300';
+                icon = 'fa-plus';
+            }
+            
+            activityItem.innerHTML = `
+                <div class="mt-1 p-1 rounded-full ${iconClass}">
+                    <i class="fas ${icon} text-xs"></i>
+                </div>
+                <div>
+                    <p class="text-sm font-medium text-gray-800 dark:text-white">${text}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Today, ${timeString}</p>
+                </div>
+            `;
+            
+            // Prepend to show newest first
+            recentActivity.insertBefore(activityItem, recentActivity.firstChild);
+            
+            // Limit to 5 activities
+            if (recentActivity.children.length > 5) {
+                recentActivity.removeChild(recentActivity.lastChild);
+            }
+        }
+
+        // Helper function to format date
+        function formatDate(dateString) {
+            const options = { year: 'numeric', month: 'short', day: 'numeric' };
+            return new Date(dateString).toLocaleDateString(undefined, options);
+        }
+
+        // Helper function to format date short (for chart labels)
+        function formatDateShort(date) {
+            return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+        }
+
+
+        function fetchQuote() {
+        fetch('/quote')
+            .then(response => response.json())
+            .then(data => {
+                const quoteElement = document.getElementById('quote');
+                const quoteAuthor = document.getElementById('quote-author');
+                quoteElement.textContent = `"${data.quote}"`;
+                quoteAuthor.textContent = data.author ? `— ${data.author}` : '';
+            })
+            .catch(error => {
+                console.error('Error fetching quote:', error);
+                // Fallback quotes
+                const quoteElement = document.getElementById('quote');
+                const quoteAuthor = document.getElementById('quote-author');
+                quoteElement.textContent = '"The only way to do great work is to love what you do."';
+                quoteAuthor.textContent = '— Steve Jobs';
+            });
+    }
+
+    // ===== THEN CALL IT WHEN THE PAGE LOADS =====
+    document.addEventListener('DOMContentLoaded', function() {
+        fetchQuote();  // Fetch first quote on page load
+        // ... (your other initialization code)
+    });
+
+
+
+
+    // History variables
+let historyPage = 1;
+const historyPerPage = 3;
+
+// Fetch and display history
+function fetchHistory(page = 1) {
+    fetch(`/history?page=${page}`)
+        .then(response => response.json())
+        .then(history => {
+            renderHistory(history);
+        })
+        .catch(error => console.error('Error fetching history:', error));
+}
+
+// Render history entries
+function renderHistory(history) {
+    const container = document.getElementById('history-container');
+    
+    if (history.length === 0) {
+        container.innerHTML = `
+            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                <i class="fas fa-inbox text-4xl mb-2"></i>
+                <p>No history yet</p>
+            </div>
+        `;
+        return;
+    }
+    
+    history.forEach(entry => {
+        const historyEntry = document.createElement('div');
+        historyEntry.className = 'history-entry border-b border-gray-200 dark:border-gray-700 pb-6 last:border-0';
+        
+        const dateHeader = document.createElement('div');
+        dateHeader.className = 'flex justify-between items-center mb-4';
+        dateHeader.innerHTML = `
+            <h3 class="font-semibold text-lg text-gray-700 dark:text-gray-300">${formatDate(entry.date)}</h3>
+            <span class="text-sm text-gray-500 dark:text-gray-400">
+                ${entry.goals.filter(g => g.completed).length}/${entry.goals.length} completed
+            </span>
+        `;
+        
+        const goalsList = document.createElement('div');
+        goalsList.className = 'space-y-2';
+        
+        entry.goals.forEach(goal => {
+            const goalItem = document.createElement('div');
+            goalItem.className = `flex items-center space-x-2 ${goal.completed ? 'opacity-75' : ''}`;
+            goalItem.innerHTML = `
+                <i class="fas ${goal.completed ? 'fa-check-circle text-green-500' : 'fa-circle text-gray-300 dark:text-gray-600'}"></i>
+                <span class="${goal.completed ? 'line-through text-gray-500 dark:text-gray-400' : 'text-gray-700 dark:text-gray-300'}">${goal.text}</span>
+            `;
+            goalsList.appendChild(goalItem);
+        });
+        
+        historyEntry.appendChild(dateHeader);
+        historyEntry.appendChild(goalsList);
+        container.appendChild(historyEntry);
+    });
+}
+
+// Load more history
+document.getElementById('load-more-history').addEventListener('click', function() {
+    historyPage++;
+    fetchHistory(historyPage);
+});
+
+// Initial history load
+fetchHistory();
+
+    
+    </script>
+</body>
+
+</html>
