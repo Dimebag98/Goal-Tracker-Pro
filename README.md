@@ -83,7 +83,7 @@ Environment Setup:
 
 Create a .env file with your Groq API key.
 
-🧬 Future Scope
+#🧬 Future Scope
 📈 More third-party integrations (calendar, health apps)
 🛡️ Enhanced security for user data
 🌐 Localization for different languages
